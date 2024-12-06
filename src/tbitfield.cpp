@@ -9,7 +9,7 @@
 
 TBitField::TBitField(int len)
 {
-    if (len <= 0)
+    if (len <= 1)
     {
         throw len;
     }
@@ -45,7 +45,7 @@ TBitField::~TBitField()
 
 int TBitField::GetMemIndex(const int n) const // индекс Мем для бита n
 {
-    if (n<0 || n>this->BitLen)
+    if (n < 0 || n>=this->BitLen)
     {
         throw "Wrong index mem";
     }
@@ -60,7 +60,7 @@ TELEM TBitField::GetMemMask(const int n) const // битовая маска дл
         throw "Wrong bit mask";
     }
 
-    return 1 << n % (sizeof(TELEM) * 8);
+    return TELEM(1) << (n % (sizeof(TELEM) * 8));
 }
 
 // доступ к битам битового поля
@@ -177,26 +177,19 @@ TBitField TBitField::operator|(const TBitField& bf) // операция "или"
 
 TBitField TBitField::operator&(const TBitField& bf) // операция "и"
 {
-    TBitField ress(max(BitLen, bf.BitLen));
-    int i = 0;
+    int len = max(BitLen, bf.BitLen);
+    TBitField ress(len);
 
-    if (MemLen >= bf.MemLen) {
-        for (int i = 0; i < bf.MemLen; i++) {
-            ress.pMem[i] = pMem[i] & bf.pMem[i];
-        }
-        for (int i = bf.MemLen; i < MemLen; i++) {
-            ress.pMem[i] = pMem[i];
-        }
+    int minMemLen = min(MemLen, bf.MemLen);
+    int maxMemLen = ress.MemLen; // Это max(MemLen, bf.MemLen)
 
-    }
-    else {
-        for (int i = 0; i < MemLen; i++) {
-            ress.pMem[i] = pMem[i] & bf.pMem[i];
-        }
-        for (int i = MemLen; i < bf.MemLen; i++) {
-            ress.pMem[i] = bf.pMem[i];
-        }
-    }
+    // Выполняем побитовое И для общих частей
+    for (int i = 0; i < minMemLen; i++)
+        ress.pMem[i] = pMem[i] & bf.pMem[i]; // Исправлено здесь
+
+    // Заполняем оставшиеся элементы нулями (они уже обнулены в конструкторе, но можно оставить)
+    for (int i = minMemLen; i < maxMemLen; i++)
+        ress.pMem[i] = 0;
 
     return ress;
 }
