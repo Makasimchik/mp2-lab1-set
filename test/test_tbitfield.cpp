@@ -324,3 +324,14 @@ TEST(TBitField, can_do_AND_correctly) {
     EXPECT_EQ(bf3, res1);
     EXPECT_EQ(bf3, res2);
 }
+
+TEST(TBitField, can_inverse) {
+    const int size = 70;
+    TBitField bf(size), bf2(1), res(size);
+    for (int i = 0; i < size; i++)
+        res.SetBit(i);
+
+    bf2 = ~bf;
+
+    EXPECT_EQ(res, bf2);
+}
